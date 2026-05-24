@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from pydantic import BaseModel
 from datetime import date
-from typing import List
 
 app = FastAPI()
 
@@ -117,9 +116,13 @@ async def get_superhumans():
     return superhumans
 
 # add a new superhuman
-@app.post('/superhumans')
-async def add_superhuman() -> dict:
-    pass
+@app.post('/superhumans', status_code=status.HTTP_201_CREATED) 
+async def add_superhuman(superhuman_data: Superhuman) -> dict:
+    new_superhuman = superhuman_data.model_dump()  # model dump() converts the Pydantic model to a dictionary
+    superhumans.append(new_superhuman)
+    return new_superhuman
+
+    
 
 # get a specific superhuman by ID
 @app.get('/superhumans/{superhuman_id}')
