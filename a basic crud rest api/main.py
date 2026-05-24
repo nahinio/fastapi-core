@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 from datetime import date
+from typing import List
 
 app = FastAPI()
 
@@ -98,11 +100,21 @@ superhumans = [
 ]
 
 
+class Superhuman(BaseModel):
+    id: int
+    name: str
+    alias: str
+    type: str
+    city: str
+    power_level: int
+    first_appearance: date
+    status: str
+
 
 # get all the superhumans
-@app.get('/superhumans')
+@app.get('/superhumans', response_model=list[Superhuman])
 async def get_superhumans():
-    pass
+    return superhumans
 
 # add a new superhuman
 @app.post('/superhumans')
