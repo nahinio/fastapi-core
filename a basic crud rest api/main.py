@@ -1,4 +1,5 @@
 from fastapi import FastAPI, status
+from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from datetime import date
 
@@ -127,7 +128,12 @@ async def add_superhuman(superhuman_data: Superhuman) -> dict:
 # get a specific superhuman by ID
 @app.get('/superhumans/{superhuman_id}')
 async def get_superhuman(superhuman_id: int) -> dict:
-    pass
+    for superhuman in superhumans:
+        if superhuman['id'] == superhuman_id:
+            return superhuman 
+        
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Superhuman not found")
+
 
 # update a specific superhuman by ID
 @app.patch('/superhumans/{superhuman_id}')
