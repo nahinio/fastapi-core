@@ -110,11 +110,22 @@ class Superhuman(BaseModel):
     first_appearance: date
     status: str
 
+class SuperhumanUpdateModel(BaseModel):
+    name: str
+    alias: str
+    type: str
+    city: str
+    power_level: int
+    status: str
+
+
 
 # get all the superhumans
 @app.get('/superhumans', response_model=list[Superhuman])
 async def get_superhumans():
     return superhumans
+
+
 
 # add a new superhuman
 @app.post('/superhumans', status_code=status.HTTP_201_CREATED) 
@@ -135,11 +146,24 @@ async def get_superhuman(superhuman_id: int) -> dict:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Superhuman not found")
 
 
+
 # update a specific superhuman by ID
 @app.patch('/superhumans/{superhuman_id}')
-async def update_superhuman(superhuman_id: int) -> dict:
-    pass
+async def update_superhuman(superhuman_id: int, superhuman_update_data: SuperhumanUpdateModel) -> dict:
+    for superhuman in superhumans:
+        if superhuman['id'] == superhuman_id:
+            superhuman['name'] = superhuman_update_data.name
+            superhuman['alias'] = superhuman_update_data.alias
+            superhuman['type'] = superhuman_update_data.type
+            superhuman['city'] = superhuman_update_data.city
+            superhuman['power_level'] = superhuman_update_data.power_level
+            superhuman['status'] = superhuman_update_data.status
 
+            return superhuman
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Superhuman not found")
+
+        
+        
 # delete a specific superhuman by ID
 @app.delete('/superhumans/{superhuman_id}')
 async def delete_superhuman(superhuman_id: int) -> dict:
