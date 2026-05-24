@@ -160,6 +160,7 @@ async def update_superhuman(superhuman_id: int, superhuman_update_data: Superhum
             superhuman['status'] = superhuman_update_data.status
 
             return superhuman
+    
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Superhuman not found")
 
         
@@ -167,4 +168,9 @@ async def update_superhuman(superhuman_id: int, superhuman_update_data: Superhum
 # delete a specific superhuman by ID
 @app.delete('/superhumans/{superhuman_id}')
 async def delete_superhuman(superhuman_id: int) -> dict:
-    pass
+    for superhuman in superhumans:
+        if superhuman['id'] == superhuman_id:
+            superhumans.remove(superhuman)
+            return {"message": "Superhuman deleted successfully"}
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Superhuman not found")
