@@ -2,9 +2,18 @@ from fastapi import FastAPI, status
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from datetime import date
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 superhumans = [
     {

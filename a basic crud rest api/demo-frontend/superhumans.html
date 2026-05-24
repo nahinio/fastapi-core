@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Superhuman DB</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f0ebe0;
+    --ink: #111;
+    --white: #fff;
+    --accent: #ff5733;
+    --accent2: #6c63ff;
+    --green: #c8f5c2;
+    --red: #ffc2c2;
+    --blue: #c2d9ff;
+    --yellow: #fff3b0;
+    --muted: #888;
+    --border: 2px solid #111;
+    --shadow: 4px 4px 0 #111;
+    --shadow-lg: 6px 6px 0 #111;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Space Mono', monospace;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 22px 36px;
+    border-bottom: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .logo em { color: var(--accent); font-style: normal; }
+
+  .total-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 5px 12px;
+    letter-spacing: 1px;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    padding: 32px 36px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-accent-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+  }
+
+  .type-hero     .card-accent-bar { background: #4caf50; }
+  .type-villain  .card-accent-bar { background: #f44336; }
+  .type-anti-hero .card-accent-bar { background: #ff9800; }
+
+  .card-id {
+    font-size: 0.58rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 8px;
+    margin-top: 6px;
+  }
+
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1.1;
+  }
+
+  .card-alias {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .card-type-badge {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1.5px solid var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .type-hero     .card-type-badge { background: var(--green); }
+  .type-villain  .card-type-badge { background: var(--red); }
+  .type-anti-hero .card-type-badge { background: var(--yellow); }
+
+  .power-bar-wrap { margin-bottom: 10px; }
+
+  .power-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .power-bar-label strong { color: var(--accent); }
+
+  .power-track {
+    height: 5px;
+    background: #e0dbd0;
+    border: 1.5px solid var(--ink);
+  }
+
+  .power-fill {
+    height: 100%;
+    background: var(--ink);
+  }
+
+  .card-city {
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  /* ── ADD CARD ── */
+  .card-add {
+    background: transparent;
+    border: 2px dashed #aaa;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.15s;
+    gap: 10px;
+  }
+
+  .card-add:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    transform: translate(-2px,-2px);
+    background: var(--white);
+  }
+
+  .card-add-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    font-weight: 300;
+  }
+
+  .card-add-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── LOADING / EMPTY ── */
+  .state-msg {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(17,17,17,0.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg);
+    border: var(--border);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: pop 0.15s ease;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.96) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: var(--border);
+    background: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+
+  .modal-close {
+    background: none;
+    border: var(--border);
+    width: 32px; height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-family: monospace;
+  }
+
+  .modal-close:hover { background: var(--red); }
+
+  .modal-body { padding: 24px; }
+
+  /* ── DETAIL VIEW ── */
+  .detail-accent {
+    height: 6px;
+    margin: -24px -24px 20px;
+  }
+
+  .type-hero     .detail-accent { background: #4caf50; }
+  .type-villain  .detail-accent { background: #f44336; }
+  .type-anti-hero .detail-accent { background: #ff9800; }
+
+  .detail-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .detail-alias {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .detail-field label {
+    display: block;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .detail-field span {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .detail-power {
+    margin-bottom: 20px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: var(--border);
+    margin-top: 4px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border: var(--border);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    letter-spacing: 0.5px;
+    transition: all 0.1s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 #111; }
+  .btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 #111; }
+
+  .btn-primary { background: var(--ink); color: var(--bg); flex: 1; }
+  .btn-edit    { background: var(--accent2); color: #fff; flex: 1; }
+  .btn-delete  { background: var(--red); color: var(--ink); }
+
+  /* ── FORM ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg.full { grid-column: 1/-1; }
+
+  .fg label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .fg input, .fg select {
+    border: var(--border);
+    background: var(--white);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    padding: 9px 11px;
+    box-shadow: 2px 2px 0 #111;
+    outline: none;
+    width: 100%;
+    transition: box-shadow 0.1s;
+  }
+
+  .fg input:focus, .fg select:focus {
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+
+  /* ── EDIT MODE in detail modal ── */
+  .edit-section { display: none; }
+  .view-section { display: block; }
+
+  /* ── TOAST ── */
+  #toasts {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 18px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: var(--border);
+    animation: slideUp 0.2s ease;
+  }
+
+  .toast.ok  { box-shadow: 4px 4px 0 #4caf50; }
+  .toast.err { box-shadow: 4px 4px 0 var(--accent); }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SuperHuman<em>/</em>Database</div>
+  <div class="total-tag" id="total-tag">LOADING...</div>
+</header>
+
+<div class="grid" id="grid">
+  <div class="state-msg">FETCHING DATA...</div>
+</div>
+
+<!-- ── DETAIL / EDIT MODAL ── -->
+<div class="overlay" id="detail-overlay">
+  <div class="modal" id="detail-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="dm-title">—</div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="dm-body"></div>
+  </div>
+</div>
+
+<!-- ── ADD MODAL ── -->
+<div class="overlay" id="add-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Superhuman</div>
+      <button class="modal-close" onclick="closeAdd()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label>ID</label><input id="a-id" type="number" placeholder="10"/></div>
+        <div class="fg"><label>Name</label><input id="a-name" type="text" placeholder="Flash"/></div>
+        <div class="fg"><label>Alias</label><input id="a-alias" type="text" placeholder="Barry Allen"/></div>
+        <div class="fg"><label>City</label><input id="a-city" type="text" placeholder="Central City"/></div>
+        <div class="fg"><label>Type</label>
+          <select id="a-type">
+            <option value="hero">Hero</option>
+            <option value="villain">Villain</option>
+            <option value="anti-hero">Anti-Hero</option>
+          </select>
+        </div>
+        <div class="fg"><label>Status</label>
+          <select id="a-status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="retired">Retired</option>
+          </select>
+        </div>
+        <div class="fg"><label>Power Level (0–100)</label><input id="a-power" type="number" min="0" max="100" placeholder="88"/></div>
+        <div class="fg"><label>First Appearance</label><input id="a-date" type="date"/></div>
+        <div class="fg full" style="margin-top:8px;">
+          <button class="btn btn-primary" onclick="submitAdd()">+ ADD TO DATABASE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+  const BASE = 'http://127.0.0.1:8000';
+  let allData = [];
+  let currentId = null;
+
+  // ── FETCH ALL ────────────────────────────────────────────
+  async function fetchAll() {
+    try {
+      const res = await fetch(`${BASE}/superhumans`);
+      allData = await res.json();
+      renderGrid();
+    } catch {
+      document.getElementById('grid').innerHTML = `<div class="state-msg">⚡ Cannot reach API..</div>`;
+      document.getElementById('total-tag').textContent = 'OFFLINE';
+    }
+  }
+
+  // ── RENDER GRID ─────────────────────────────────────────
+  function renderGrid() {
+    document.getElementById('total-tag').textContent = `${allData.length} TOTAL`;
+    const grid = document.getElementById('grid');
+
+    const cards = allData.map(s => `
+      <div class="card type-${s.type.replace(' ','-')}" onclick="openDetail(${s.id})">
+        <div class="card-accent-bar"></div>
+        <div class="card-id">#${s.id}</div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-alias">aka ${s.alias}</div>
+        <div class="card-type-badge">${s.type}</div>
+        <div class="power-bar-wrap">
+          <div class="power-bar-label">
+            <span>Power</span><strong>${s.power_level}</strong>
+          </div>
+          <div class="power-track">
+            <div class="power-fill" style="width:${s.power_level}%"></div>
+          </div>
+        </div>
+        <div class="card-city"> ${s.city}</div>
+      </div>
+    `).join('');
+
+    const addCard = `
+      <div class="card card-add" onclick="openAdd()">
+        <div class="card-add-icon">+</div>
+        <div class="card-add-label">Add New</div>
+      </div>
+    `;
+
+    grid.innerHTML = cards + addCard;
+  }
+
+  // ── OPEN DETAIL ─────────────────────────────────────────
+  async function openDetail(id) {
+    currentId = id;
+    document.getElementById('dm-title').textContent = '...';
+    document.getElementById('dm-body').innerHTML = '<div style="padding:20px;color:var(--muted);font-size:0.75rem;">Loading...</div>';
+    document.getElementById('detail-overlay').classList.add('open');
+
+    try {
+      const res = await fetch(`${BASE}/superhumans/${id}`);
+      const s = await res.json();
+      document.getElementById('dm-title').textContent = s.name;
+      document.getElementById('dm-body').innerHTML = detailHTML(s);
+    } catch {
+      document.getElementById('dm-body').innerHTML = '<div style="padding:20px;color:red;font-size:0.75rem;">Failed to load.</div>';
+    }
+  }
+
+  function detailHTML(s) {
+    const typeClass = `type-${s.type.replace(' ','-')}`;
+    return `
+      <div class="${typeClass}">
+        <div class="detail-accent"></div>
+        <!-- VIEW MODE -->
+        <div id="view-mode">
+          <div class="detail-name">${s.name}</div>
+          <div class="detail-alias">aka ${s.alias}</div>
+          <div class="detail-power">
+            <div class="power-bar-label">
+              <span>POWER LEVEL</span><strong>${s.power_level}</strong>
+            </div>
+            <div class="power-track" style="margin-top:4px;">
+              <div class="power-fill" style="width:${s.power_level}%"></div>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-field"><label>Type</label><span>${s.type}</span></div>
+            <div class="detail-field"><label>City</label><span>${s.city}</span></div>
+            <div class="detail-field"><label>Status</label><span>${s.status}</span></div>
+            <div class="detail-field"><label>First Appearance</label><span>${s.first_appearance || '—'}</span></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-edit" onclick="switchToEdit(${JSON.stringify(s).replace(/"/g,'&quot;')})">EDIT</button>
+            <button class="btn btn-delete" onclick="doDelete(${s.id})">DELETE</button>
+          </div>
+        </div>
+
+        <!-- EDIT MODE -->
+        <div id="edit-mode" style="display:none;">
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="fg"><label>Name</label><input id="e-name" value="${s.name}"/></div>
+            <div class="fg"><label>Alias</label><input id="e-alias" value="${s.alias}"/></div>
+            <div class="fg"><label>City</label><input id="e-city" value="${s.city}"/></div>
+            <div class="fg"><label>Type</label>
+              <select id="e-type">
+                <option value="hero" ${s.type==='hero'?'selected':''}>Hero</option>
+                <option value="villain" ${s.type==='villain'?'selected':''}>Villain</option>
+                <option value="anti-hero" ${s.type==='anti-hero'?'selected':''}>Anti-Hero</option>
+              </select>
+            </div>
+            <div class="fg"><label>Power Level</label><input id="e-power" type="number" min="0" max="100" value="${s.power_level}"/></div>
+            <div class="fg"><label>Status</label>
+              <select id="e-status">
+                <option value="active" ${s.status==='active'?'selected':''}>Active</option>
+                <option value="inactive" ${s.status==='inactive'?'selected':''}>Inactive</option>
+                <option value="retired" ${s.status==='retired'?'selected':''}>Retired</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-primary" onclick="submitEdit(${s.id})">SAVE CHANGES</button>
+            <button class="btn btn-delete" onclick="cancelEdit()">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function switchToEdit(s) {
+    document.getElementById('view-mode').style.display = 'none';
+    document.getElementById('edit-mode').style.display = 'block';
+  }
+
+  function cancelEdit() {
+    document.getElementById('view-mode').style.display = 'block';
+    document.getElementById('edit-mode').style.display = 'none';
+  }
+
+  // ── SUBMIT EDIT ─────────────────────────────────────────
+  async function submitEdit(id) {
+    const body = {
+      name:        document.getElementById('e-name').value,
+      alias:       document.getElementById('e-alias').value,
+      city:        document.getElementById('e-city').value,
+      type:        document.getElementById('e-type').value,
+      power_level: parseInt(document.getElementById('e-power').value),
+      status:      document.getElementById('e-status').value,
+    };
+    try {
+      const res = await fetch(`${BASE}/superhumans/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error();
+      toast(`${body.name} updated!`, 'ok');
+      closeDetail();
+      await fetchAll();
+    } catch { toast('Update failed.', 'err'); }
+  }
+
+  // ── DELETE ──────────────────────────────────────────────
+  async function doDelete(id) {
+    const name = allData.find(x => x.id === id)?.name || `#${id}`;
+    if (!confirm(`Delete ${name}?`)) return;
+    try {
+      const res = await fetch(`${BASE}/superhumans/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      toast(`${name} deleted.`, 'ok');
+      closeDetail();
+      await fetchAll();
+    } catch { toast('Delete failed.', 'err'); }
+  }
+
+  // ── ADD ─────────────────────────────────────────────────
+  function openAdd() { document.getElementById('add-overlay').classList.add('open'); }
+  function closeAdd() { document.getElementById('add-overlay').classList.remove('open'); }
+
+  async function submitAdd() {
+    const body = {
+      id:               parseInt(document.getElementById('a-id').value),
+      name:             document.getElementById('a-name').value,
+      alias:            document.getElementById('a-alias').value,
+      city:             document.getElementById('a-city').value,
+      type:             document.getElementById('a-type').value,
+      status:           document.getElementById('a-status').value,
+      power_level:      parseInt(document.getElementById('a-power').value),
+      first_appearance: document.getElementById('a-date').value || null,
+    };
+
+    if (!body.name || !body.alias || !body.city || isNaN(body.power_level) || isNaN(body.id)) {
+      toast('Fill in all fields.', 'err'); return;
+    }
+
+    try {
+      const res = await fetch(`${BASE}/superhumans`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error();
+      toast(`${body.name} added!`, 'ok');
+      closeAdd();
+      await fetchAll();
+    } catch { toast('Failed to add.', 'err'); }
+  }
+
+  // ── CLOSE MODALS ────────────────────────────────────────
+  function closeDetail() { document.getElementById('detail-overlay').classList.remove('open'); }
+
+  document.getElementById('detail-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
+  document.getElementById('add-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeAdd(); });
+
+  // ── TOAST ────────────────────────────────────────────────
+  function toast(msg, type = '') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    document.getElementById('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // ── INIT ────────────────────────────────────────────────
+  fetchAll();
+</script>
+</body>
+</html>
