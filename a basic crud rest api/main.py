@@ -99,4 +99,27 @@ superhumans = [
 
 
 
+# get all the superhumans
+@app.get('/superhumans')
+async def get_superhumans():
+    pass
 
+# add a new superhuman
+@app.post('/superhumans')
+async def add_superhuman() -> dict:
+    pass
+
+# get a specific superhuman by ID
+@app.get('/superhumans/{superhuman_id}')
+async def get_superhuman(superhuman_id: int) -> dict:
+    pass
+
+# update a specific superhuman by ID
+@app.patch('/superhumans/{superhuman_id}')
+async def update_superhuman(superhuman_id: int) -> dict:
+    pass
+
+# delete a specific superhuman by ID
+@app.delete('/superhumans/{superhuman_id}')
+async def delete_superhuman(superhuman_id: int) -> dict:
+    pass
